@@ -10,7 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+/* Macro used in check_id, what is it for? */
 #define N 32
+/* Seems unused */
 #define M 40
 
 int usage(char *progname)
@@ -30,6 +32,10 @@ int usage(char *progname)
 static inline void native_cpuid(unsigned int *eax, unsigned int *ebx,
 				unsigned int *ecx, unsigned int *edx)
 {
+/* Outputting values of EAX, EBX, ECX and EDX into eax, ebx, ecx and edx
+ * Takes eax and ecx variables as input and makes sure that the output of the first and third operand goes into respectively eax and ecx variables
+ * memory: tells the compiler that the assembly code performs memory reads or writes to items other than those listed in the input and output operands (for example, accessing the memory pointed to by one of the input parameters)
+ */
 	asm volatile("cpuid"
 	: "=a" (*eax),
 	"=b" (*ebx),
@@ -39,7 +45,8 @@ static inline void native_cpuid(unsigned int *eax, unsigned int *ebx,
 	: "memory");
 }
 
-/* Convert hex to binary mode to display cpuid information. */
+/* Convert hex to binary mode to display cpuid information.
+ * n is a variable holding the value of a register */
 int h_to_b(long n)
 {
 	int i = 0;
@@ -58,18 +65,57 @@ int h_to_b(long n)
 	return 0;
 }
 
-/* Check that the cpuid target output bits are correct. */
+/* Check that the cpuid target output bits are correct.
+ * in my testing, n was always 2 ** 31 - 1 at the start of this function */
 int check_id(long n, int ex_number)
 {
 	int i = 0;
 	static int b[N];
 	int bit_n = N - 1 - ex_number;
 
+	/* N is 32 and this loop goes index N-1 to 0, filling the b array with 0's and 1's (so b could be switched to bool)
+	 * looking at h_to_b(), the following loop seems to convert hex to binary
+	 */
 	for (i = 0; i != N; ++i) {
 		b[N - 1 - i] = n % 2;
 		n /= 2;
 	}
 	printf("Start with 0, pass: bit set 1, fail: bit set 0\n");
+	/* Since n was 2 ** 31 - 1 at the beginning, the values of the whole array are predermined and are:
+	 * b[32 - 1 - 0] = 2147417087 % 2 = 1
+	 * b[32 - 1 - 1] = 1073708543 % 2 = 1
+	 * b[32 - 1 - 2] = 536854271 % 2 = 1
+	 * b[32 - 1 - 3] = 268427135 % 2 = 1
+	 * b[32 - 1 - 4] = 134213567 % 2 = 1
+	 * b[32 - 1 - 5] = 67106783 % 2 = 1
+	 * b[32 - 1 - 6] = 33553391 % 2 = 1
+	 * b[32 - 1 - 7] = 16776695 % 2 = 1
+	 * b[32 - 1 - 8] = 8388347 % 2 = 1
+	 * b[32 - 1 - 9] = 4194173 % 2 = 1
+	 * b[32 - 1 - 10] = 2097086 % 2 = 0
+	 * b[32 - 1 - 11] = 1048543 % 2 = 1
+	 * b[32 - 1 - 12] = 524271 % 2 = 1
+	 * b[32 - 1 - 13] = 262135 % 2 = 1
+	 * b[32 - 1 - 14] = 131067 % 2 = 1
+	 * b[32 - 1 - 15] = 65533 % 2 = 1
+	 * b[32 - 1 - 16] = 32766 % 2 = 0
+	 * b[32 - 1 - 17] = 16383 % 2 = 1
+	 * b[32 - 1 - 18] = 8191 % 2 = 1
+	 * b[32 - 1 - 19] = 4095 % 2 = 1
+	 * b[32 - 1 - 20] = 2047 % 2 = 1
+	 * b[32 - 1 - 21] = 1023 % 2 = 1
+	 * b[32 - 1 - 22] = 511 % 2 = 1
+	 * b[32 - 1 - 23] = 255 % 2 = 1
+	 * b[32 - 1 - 24] = 127 % 2 = 1
+	 * b[32 - 1 - 25] = 63 % 2 = 1
+	 * b[32 - 1 - 26] = 31 % 2 = 1
+	 * b[32 - 1 - 27] = 15 % 2 = 1
+	 * b[32 - 1 - 28] = 7 % 2 = 1
+	 * b[32 - 1 - 29] = 3 % 2 = 1
+	 * b[32 - 1 - 30] = 1 % 2 = 1
+	 * b[32 - 1 - 31] = 0 % 2 = 0
+	 * This means that the test will always fail when the 6th argument is either 10, 16 or 31. */
+
 	if (b[bit_n] == 1) {
 		printf("Order bit:%d, invert order:%d, bit:%d, pass!\n",
 		       bit_n, ex_number, b[bit_n]);
