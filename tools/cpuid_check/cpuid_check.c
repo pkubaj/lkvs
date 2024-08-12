@@ -66,7 +66,7 @@ int h_to_b(long n)
 }
 
 /* Check that the cpuid target output bits are correct.
- * in my testing, n was always 2 ** 31 - 1 at the start of this function */
+ * in my testing, n was always 2 ** 31 - 1 at the start of this function for CPU_XS_BAT_AESNI_CPU_ID_TEST test */
 int check_id(long n, int ex_number)
 {
 	int i = 0;
@@ -81,7 +81,7 @@ int check_id(long n, int ex_number)
 		n /= 2;
 	}
 	printf("Start with 0, pass: bit set 1, fail: bit set 0\n");
-	/* Since n was 2 ** 31 - 1 at the beginning, the values of the whole array are predermined and are:
+	/* Since n was 2 ** 31 - 1 at the beginning (for CPU_XS_BAT_AESNI_CPU_ID_TEST), the values of the whole array are predermined and are:
 	 * b[32 - 1 - 0] = 2147417087 % 2 = 1
 	 * b[32 - 1 - 1] = 1073708543 % 2 = 1
 	 * b[32 - 1 - 2] = 536854271 % 2 = 1
